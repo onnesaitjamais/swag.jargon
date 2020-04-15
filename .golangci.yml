@@ -1,0 +1,9 @@
+### https://github.com/golangci/golangci-lint
+###------------------------------------------
+
+linters:
+  enable-all: true
+  disable:
+    - gochecknoglobals
+    - gochecknoinits
+    - gomnd
