@@ -63,7 +63,7 @@ func render(style string, services registry.Services) {
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(
 		table.Row{
-			"#", "ID", "NAME", "VERSION", "BUILT", "SERVER", "PORT", "INSTANCE", "STATUS", "UPTIME", "HEARTBEAT",
+			"#", "ID", "NAME", "VERSION", "BUILT", "FQDN", "PORT", "INSTANCE", "STATUS", "UPTIME", "HEARTBEAT",
 		},
 	)
 
