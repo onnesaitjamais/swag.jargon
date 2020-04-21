@@ -4,6 +4,6 @@
 linters:
   enable-all: true
   disable:
+    - funlen
     - gochecknoglobals
-    - gochecknoinits
     - gomnd

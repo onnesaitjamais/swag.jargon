@@ -12,8 +12,8 @@
 package services
 
 // Stop AFAIRE
-func Stop(service, sdInstanceID string) error {
-	return restartOrStop("stop", service, sdInstanceID)
+func (c *Cmd) Stop(service, sdInstanceID string) error {
+	return c.restartOrStop("stop", service, sdInstanceID)
 }
 
 /*

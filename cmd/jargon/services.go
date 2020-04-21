@@ -17,92 +17,109 @@ import (
 	"github.com/arnumina/swag.jargon/internal/services"
 )
 
-var servicesCmd = &cobra.Command{
-	Use:   "services",
-	Short: "Print the list of services (+start, +stop, +restart)",
-	ValidArgs: []string{
-		"basic",
-		"dark",
-		"double",
-		"light",
-		"simple",
-	},
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
-			return err
-		}
+const (
+	_defaultBSName = "mirage"
+	_defaultBSPort = 65533
+)
 
-		return cobra.OnlyValidArgs(cmd, args)
-	},
-	RunE: func(_ *cobra.Command, args []string) error {
-		var style string
+func addServices(root *cobra.Command) {
+	cmd := &services.Cmd{
+		BSName: _defaultBSName,
+		BSPort: _defaultBSPort,
+	}
 
-		if len(args) != 0 {
-			style = args[0]
-		}
+	cmdServices := &cobra.Command{
+		Use:   "services",
+		Short: "Print the list of services (+start, +stop, +restart)",
+		ValidArgs: []string{
+			"basic",
+			"dark",
+			"double",
+			"light",
+			"simple",
+		},
+		Args: func(cmd *cobra.Command, args []string) error {
+			if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
+				return err
+			}
 
-		return services.List(style)
-	},
-}
+			return cobra.OnlyValidArgs(cmd, args)
+		},
+		RunE: func(_ *cobra.Command, args []string) error {
+			var style string
 
-var servicesStartCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start service(s)",
-	RunE: func(_ *cobra.Command, args []string) error {
-		return services.Start(args)
-	},
-}
+			if len(args) != 0 {
+				style = args[0]
+			}
 
-var servicesStopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stop service(s)",
-	Args:  cobra.MaximumNArgs(2),
-	RunE: func(_ *cobra.Command, args []string) error {
-		var (
-			serviceName  string
-			sdInstanceID string
-		)
+			return cmd.List(style)
+		},
+	}
 
-		switch len(args) {
-		case 2:
-			sdInstanceID = args[1]
-			fallthrough
-		case 1:
-			serviceName = args[0]
-		}
+	cmdServicesStart := &cobra.Command{
+		Use:   "start",
+		Short: "Start service(s)",
+		RunE: func(_ *cobra.Command, args []string) error {
+			return cmd.Start(args)
+		},
+	}
 
-		return services.Stop(serviceName, sdInstanceID)
-	},
-}
+	cmdServicesStop := &cobra.Command{
+		Use:   "stop",
+		Short: "Stop service(s)",
+		Args:  cobra.MaximumNArgs(2),
+		RunE: func(_ *cobra.Command, args []string) error {
+			var (
+				serviceName  string
+				sdInstanceID string
+			)
 
-var servicesRestartCmd = &cobra.Command{
-	Use:   "restart",
-	Short: "Restart service(s)",
-	Args:  cobra.MaximumNArgs(2),
-	RunE: func(_ *cobra.Command, args []string) error {
-		var (
-			serviceName  string
-			sdInstanceID string
-		)
+			switch len(args) {
+			case 2:
+				sdInstanceID = args[1]
+				fallthrough
+			case 1:
+				serviceName = args[0]
+			}
 
-		switch len(args) {
-		case 2:
-			sdInstanceID = args[1]
-			fallthrough
-		case 1:
-			serviceName = args[0]
-		}
+			return cmd.Stop(serviceName, sdInstanceID)
+		},
+	}
 
-		return services.Restart(serviceName, sdInstanceID)
-	},
-}
+	cmdServicesRestart := &cobra.Command{
+		Use:   "restart",
+		Short: "Restart service(s)",
+		Args:  cobra.MaximumNArgs(2),
+		RunE: func(_ *cobra.Command, args []string) error {
+			var (
+				serviceName  string
+				sdInstanceID string
+			)
 
-func init() {
-	rootCmd.AddCommand(servicesCmd)
+			switch len(args) {
+			case 2:
+				sdInstanceID = args[1]
+				fallthrough
+			case 1:
+				serviceName = args[0]
+			}
 
-	servicesCmd.AddCommand(servicesStartCmd)
-	servicesCmd.AddCommand(servicesStopCmd)
-	servicesCmd.AddCommand(servicesRestartCmd)
+			return cmd.Restart(serviceName, sdInstanceID)
+		},
+	}
+
+	root.AddCommand(cmdServices)
+	cmdServices.PersistentFlags().IntVarP(
+		&cmd.BSPort,
+		_defaultBSName,
+		"p",
+		_defaultBSPort,
+		"backend service port",
+	)
+
+	cmdServices.AddCommand(cmdServicesStart)
+	cmdServices.AddCommand(cmdServicesStop)
+	cmdServices.AddCommand(cmdServicesRestart)
 }
 
 /*

@@ -24,13 +24,18 @@ import (
 	"github.com/jedib0t/go-pretty/table"
 )
 
-const (
-	_bsName = "mirage"
-	_bsURL  = "http://:65533/api/v1/services"
-)
+// Cmd AFAIRE
+type Cmd struct {
+	BSName string
+	BSPort int
+}
 
-func listServices() (registry.Services, error) {
-	res, err := http.Get(_bsURL)
+func (c *Cmd) url() string {
+	return fmt.Sprintf("http://:%d/api/v1/services", c.BSPort)
+}
+
+func (c *Cmd) listServices() (registry.Services, error) {
+	res, err := http.Get(c.url())
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +63,7 @@ func listServices() (registry.Services, error) {
 	return services, nil
 }
 
-func render(style string, services registry.Services) {
+func (c *Cmd) render(style string, services registry.Services) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(
@@ -103,25 +108,25 @@ func render(style string, services registry.Services) {
 }
 
 // List AFAIRE
-func List(style string) error {
-	services, err := listServices()
+func (c *Cmd) List(style string) error {
+	services, err := c.listServices()
 	if err != nil {
 		return err
 	}
 
-	render(style, services)
+	c.render(style, services)
 
 	return nil
 }
 
-func doOne(action, service, sdInstance string) error {
+func (c *Cmd) doOne(action, service, sdInstance string) error {
 	var instance string
 
 	if sdInstance != "" {
 		instance = "/" + sdInstance
 	}
 
-	res, err := http.Get(fmt.Sprintf("%s/%s/%s%s", _bsURL, action, service, instance))
+	res, err := http.Get(fmt.Sprintf("%s/%s/%s%s", c.url(), action, service, instance))
 	if err != nil {
 		return err
 	}
@@ -142,8 +147,8 @@ func doOne(action, service, sdInstance string) error {
 	return nil
 }
 
-func restartOrStop(action, service, sdInstance string) error {
-	services, err := listServices()
+func (c *Cmd) restartOrStop(action, service, sdInstance string) error {
+	services, err := c.listServices()
 	if err != nil {
 		return err
 	}
@@ -153,12 +158,12 @@ func restartOrStop(action, service, sdInstance string) error {
 	for _, s := range services {
 		if service == "" || s.Name == service {
 			if sdInstance == "" || s.SdInstance == sdInstance {
-				if s.Name == _bsName {
+				if s.Name == c.BSName {
 					bsSdInstance = s.SdInstance
 					continue
 				}
 
-				if err = doOne(action, s.Name, s.SdInstance); err != nil {
+				if err = c.doOne(action, s.Name, s.SdInstance); err != nil {
 					return err
 				}
 			}
@@ -166,7 +171,7 @@ func restartOrStop(action, service, sdInstance string) error {
 	}
 
 	if bsSdInstance != "" {
-		return doOne(action, _bsName, bsSdInstance)
+		return c.doOne(action, c.BSName, bsSdInstance)
 	}
 
 	return nil

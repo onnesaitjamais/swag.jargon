@@ -18,21 +18,21 @@ import (
 )
 
 // Start AFAIRE
-func Start(services []string) error {
+func (c *Cmd) Start(services []string) error {
 	if len(services) == 0 {
 		if os.Getuid() != 0 {
 			return nil
 		}
 
-		return exec.Command("systemctl", "start", fmt.Sprintf("swag.%s@0.service", _bsName)).Run() //nolint:gosec
+		return exec.Command("systemctl", "start", fmt.Sprintf("swag.%s@0.service", c.BSName)).Run() //nolint:gosec
 	}
 
 	for _, name := range services {
-		if name == _bsName {
+		if name == c.BSName {
 			continue
 		}
 
-		if err := doOne("start", name, ""); err != nil {
+		if err := c.doOne("start", name, ""); err != nil {
 			return err
 		}
 	}

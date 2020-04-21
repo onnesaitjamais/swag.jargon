@@ -12,8 +12,8 @@
 package services
 
 // Restart AFAIRE
-func Restart(service, sdInstanceID string) error {
-	return restartOrStop("restart", service, sdInstanceID)
+func (c *Cmd) Restart(service, sdInstanceID string) error {
+	return c.restartOrStop("restart", service, sdInstanceID)
 }
 
 /*

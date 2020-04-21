@@ -20,11 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "swag.jargon",
-	Short: "The swag command line client",
-}
-
 func header(w io.Writer) {
 	fmt.Fprintln(w, "\tswag.jargon")
 	fmt.Fprintln(w, "=================================================================================================")
@@ -49,16 +44,24 @@ func Run(version, builtAt string) error {
 		return err
 	}
 
-	rootCmd.Version = fmt.Sprintf(
+	root := &cobra.Command{
+		Use:   "swag.jargon",
+		Short: "The swag command line client",
+	}
+
+	root.Version = fmt.Sprintf(
 		"%s built at %s by Archivage Numérique © INA %d\n",
 		version,
 		time.Unix(ts, 0).Local().String(),
 		time.Now().Year(),
 	)
 
-	rootCmd.SetHelpFunc(helpFunc(rootCmd.HelpFunc()))
+	root.SetHelpFunc(helpFunc(root.HelpFunc()))
 
-	return rootCmd.Execute()
+	addLog(root)
+	addServices(root)
+
+	return root.Execute()
 }
 
 /*

@@ -19,20 +19,20 @@ import (
 
 const _defaultLogFile = "/var/log/swag/swag.log"
 
-var file string
+func addLog(root *cobra.Command) {
+	var file string
 
-var logCmd = &cobra.Command{
-	Use:   "log",
-	Short: "Print the log file in real time",
-	Args:  cobra.NoArgs,
-	RunE: func(_ *cobra.Command, _ []string) error {
-		return log.TailFile(file)
-	},
-}
+	cmd := &cobra.Command{
+		Use:   "log",
+		Short: "Print the log file in real time",
+		Args:  cobra.NoArgs,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return log.TailFile(file)
+		},
+	}
 
-func init() {
-	rootCmd.AddCommand(logCmd)
-	logCmd.Flags().StringVarP(&file, "file", "f", _defaultLogFile, "the log file to be printed")
+	root.AddCommand(cmd)
+	cmd.Flags().StringVarP(&file, "file", "f", _defaultLogFile, "the log file to be printed")
 }
 
 /*
